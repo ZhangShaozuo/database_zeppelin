@@ -6,7 +6,7 @@ from pyspark.ml.feature import HashingTF, IDF, Tokenizer, CountVectorizer
 sparkSession = SparkSession.builder.appName("tf idf Notebook").getOrCreate()
 sc = sparkSession.sparkContext
 hdfs_nn = "172.31.67.32"
-reviews = sparkSession.read.csv("hdfs://%s:9000/input/pcc/kindle_reviews.csv" % (hdfs_nn))
+reviews = sparkSession.read.csv("hdfs://%s:9000/user/hadoop/Reviews/part-m-00000" % (hdfs_nn))
 # reviews.show()
 
 #Block 2
@@ -33,7 +33,7 @@ idf_model = idf_value.fit(get_count_data)
 final_rescaled_data = idf_model.transform(get_count_data)
 #final_rescaled_data.show(5)
 
-final_rescaled_data.select("idf_value").show()
+# final_rescaled_data.select("idf_value").show()
 #vocabulary list
 vocabalary = model.vocabulary
 
@@ -53,5 +53,6 @@ output_file = final_rescaled_data.select('_c6', '_c1', '_c5', 'idf_value').rdd.m
     lambda x: [x[0], x[1], x[2], save_as_string(x[3])])
 
 output_df = sparkSession.createDataFrame(output_file, ['_c6', '_c1', '_c5', 'tfidf_value'])
+output_df.show()
 output_df.write.csv("hdfs://%s:9000/output/reviews_tfidf_dir" % (hdfs_nn))
 sc.stop()
